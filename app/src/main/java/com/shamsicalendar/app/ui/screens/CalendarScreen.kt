@@ -144,7 +144,7 @@ fun CalendarScreen(
                 .padding(padding)
                 .padding(horizontal = 8.dp)
         ) {
-            // نوار ناوبری ماه
+            // نوار ناوبری ماه - در RTL دکمه راست = ماه بعد، دکمه چپ = ماه قبل
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -152,13 +152,14 @@ fun CalendarScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // در RTL، این دکمه سمت راست قرار می‌گیرد = ماه بعد
                 IconButton(onClick = {
-                    if (currentMonth == 1) {
-                        currentMonth = 12; currentYear--
-                    } else currentMonth--
+                    if (currentMonth == 12) {
+                        currentMonth = 1; currentYear++
+                    } else currentMonth++
                     selectedDay = 1
                 }) {
-                    Icon(Icons.Default.ChevronRight, contentDescription = "ماه قبل", tint = GoldPrimary)
+                    Icon(Icons.Default.ChevronRight, contentDescription = "ماه بعد", tint = GoldPrimary)
                 }
                 Card(
                     modifier = Modifier
@@ -181,13 +182,14 @@ fun CalendarScreen(
                         )
                     }
                 }
+                // در RTL، این دکمه سمت چپ قرار می‌گیرد = ماه قبل
                 IconButton(onClick = {
-                    if (currentMonth == 12) {
-                        currentMonth = 1; currentYear++
-                    } else currentMonth++
+                    if (currentMonth == 1) {
+                        currentMonth = 12; currentYear--
+                    } else currentMonth--
                     selectedDay = 1
                 }) {
-                    Icon(Icons.Default.ChevronLeft, contentDescription = "ماه بعد", tint = GoldPrimary)
+                    Icon(Icons.Default.ChevronLeft, contentDescription = "ماه قبل", tint = GoldPrimary)
                 }
             }
 

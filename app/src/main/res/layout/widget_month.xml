@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@drawable/widget_bg"
+    android:layoutDirection="rtl"
     android:padding="10dp">
 
     <!-- عنوان ماه -->
@@ -19,12 +20,11 @@
         android:fontFamily="@font/vazirmatn_bold"
         android:paddingBottom="6dp" />
 
-    <!-- هدر روزهای هفته - شنبه تا جمعه (راست به چپ با layoutDirection=rtl) -->
+    <!-- هدر روزهای هفته - شنبه تا جمعه -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layoutDirection="rtl"
         android:weightSum="7">
 
         <TextView android:id="@+id/dow_0" android:layout_width="0dp" android:layout_height="wrap_content"
@@ -68,8 +68,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical"
-        android:layoutDirection="rtl">
+        android:orientation="vertical">
 
         <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:weightSum="7">
             <TextView android:id="@+id/day_0" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="12sp" android:fontFamily="@font/vazirmatn_regular" android:textColor="@color/text_primary" android:background="@drawable/widget_day_normal" />
