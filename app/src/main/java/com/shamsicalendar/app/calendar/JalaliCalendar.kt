@@ -4,8 +4,8 @@ import java.util.Calendar
 import java.util.GregorianCalendar
 
 /**
- * تقویم Jalali (شمسی) - مبتنی بر الگوریتم دقیق Kazimierz M. Borkowski
- * که از سال ۱۲۹۰ تا ۱۴۰۰ و فراتر دقیق است.
+ * تقویم Jalali (شمسی) - مبتنی بر الگوریتم div/mod معتبر jdf
+ * (نسخه استاندارد استفاده‌شده در اپ‌های ایرانی)
  *
  * ماه‌ها: ۶ ماه اول ۳۱ روزه، ۵ ماه بعدی ۳۰ روزه، ماه آخر ۲۹ یا ۳۰ روزه (کبیسه)
  */
@@ -16,103 +16,85 @@ object JalaliCalendar {
         val month: Int,   // 1..12
         val day: Int      // 1..31
     ) {
-        override fun toString(): String = "${toPersianDigits(year.toString())}/${toPersianDigits(month.toString().padStart(2, '0'))}/${toPersianDigits(day.toString().padStart(2, '0'))}"
+        override fun toString(): String =
+            "${toPersianDigits(year.toString())}/${toPersianDigits(month.toString().padStart(2, '0'))}/${toPersianDigits(day.toString().padStart(2, '0'))}"
     }
 
-    /** تبدیل میلادی به شمسی */
+    /** تبدیل میلادی به شمسی - الگوریتم استاندارد jdf */
     fun gregorianToJalali(gy: Int, gm: Int, gd: Int): JDate {
-        val gDaysInMonth = intArrayOf(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
-        val jDaysInMonth = intArrayOf(31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29)
+        var g_d_m = intArrayOf(0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334)
 
-        var gy2 = gy
-        var gm2 = gm - 1
-        var gd2 = gd
+        var gy2 = if (gm > 2) gy + 1 else gy
+        var days = 355666 + 365 * gy + (gy2 + 3) / 4 - (gy2 + 99) / 100 + (gy2 + 399) / 400 + gd + g_d_m[gm - 1]
 
-        var gDayNo = 365L * gy2 +
-            (gy2 + 3) / 4 -
-            (gy2 + 99) / 100 +
-            (gy2 + 399) / 400
+        var jy = -1595 + 33 * (days / 12053)
+        days %= 12053
 
-        for (i in 0 until gm2) {
-            gDayNo += gDaysInMonth[i]
+        jy += 4 * (days / 1461)
+        days %= 1461
+
+        if (days > 365) {
+            jy += (days - 1) / 365
+            days = (days - 1) % 365
         }
 
-        if (gm2 > 1 && isGregorianLeap(gy2)) {
-            gDayNo++
-        }
-        gDayNo += gd2.toLong() - 1
-
-        var jDayNo = gDayNo - 79
-
-        var jNp = jDayNo / 12053
-        jDayNo %= 12053
-
-        var jy = 979 + 33 * jNp.toInt() + 4 * (jDayNo / 1461).toInt()
-        jDayNo %= 1461
-
-        if (jDayNo >= 366) {
-            jy += ((jDayNo - 1) / 365).toInt()
-            jDayNo = (jDayNo - 1) % 365
+        var jm: Int
+        var jd: Int
+        if (days < 186) {
+            jm = 1 + days / 31
+            jd = 1 + (days % 31)
+        } else {
+            jm = 7 + (days - 186) / 30
+            jd = 1 + (days - 186) % 30
         }
 
-        var i = 0
-        while (i < 11 && jDayNo >= jDaysInMonth[i]) {
-            jDayNo -= jDaysInMonth[i]
-            i++
-        }
-        val jm = i + 1
-        val jd = jDayNo.toInt() + 1
         return JDate(jy, jm, jd)
     }
 
-    /** تبدیل شمسی به میلادی */
+    /** تبدیل شمسی به میلادی - الگوریتم استاندارد jdf */
     fun jalaliToGregorian(jy: Int, jm: Int, jd: Int): Triple<Int, Int, Int> {
-        val jDaysInMonth = intArrayOf(31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29)
-
         var jy2 = jy - 979
-        var jm2 = jm - 1
-        var jd2 = jd - 1
-
-        var jDayNo = 365L * jy2 +
-            (jy2 / 33).toInt() * 8 +
-            ((jy2 % 33 + 3) / 4).toInt()
-
-        for (i in 0 until jm2) {
-            jDayNo += jDaysInMonth[i]
+        var days = 365 * jy2 + (jy2 / 33) * 8 + (jy2 % 33 + 3) / 4 + jd
+        if (jm < 7) {
+            days += (jm - 1) * 31
+        } else {
+            days += (jm - 7) * 30 + 186
         }
-        jDayNo += jd2.toLong()
 
-        var gDayNo = jDayNo + 79
-
-        var gy = 1600 + 400 * (gDayNo / 146097).toInt()
-        gDayNo %= 146097L
+        var gy = 400 * (days / 146097)
+        days %= 146097
 
         var leap = true
-        if (gDayNo >= 36525) {
-            gDayNo--
-            gy += 100 * (gDayNo / 36524).toInt()
-            gDayNo %= 36524L
-            if (gDayNo >= 365) gDayNo++ else leap = false
+        if (days >= 36525) {
+            days--
+            gy += 100 * (days / 36524)
+            days %= 36524
+            if (days >= 365) {
+                days++
+            } else {
+                leap = false
+            }
         }
 
-        gy += 4 * (gDayNo / 1461).toInt()
-        gDayNo %= 1461L
+        gy += 4 * (days / 1461)
+        days %= 1461
 
-        if (gDayNo >= 366) {
+        if (days > 365) {
+            gy += (days - 1) / 365
+            days = (days - 1) % 365
             leap = false
-            gDayNo--
-            gy += (gDayNo / 365).toInt()
-            gDayNo = gDayNo % 365
         }
 
-        val salA = intArrayOf(31, if (leap) 29 else 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
-        var gd = gDayNo.toInt() + 1
+        var sal_a = if (leap) intArrayOf(0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335)
+        else intArrayOf(0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334)
+
         var gm = 0
-        while (gm < 11 && gd > salA[gm]) {
-            gd -= salA[gm]
+        while (gm < 11 && days >= sal_a[gm + 1]) {
             gm++
         }
-        return Triple(gy, gm + 1, gd)
+        var gd = days - sal_a[gm] + 1
+
+        return Triple(gy + 1600, gm + 1, gd)
     }
 
     fun isGregorianLeap(year: Int): Boolean =
@@ -120,9 +102,8 @@ object JalaliCalendar {
 
     /** آیا سال شمسی کبیسه است؟ - بر اساس محاسبه دقیق */
     fun isJalaliLeap(jy: Int): Boolean {
-        val cycle = ((jy - 1394) % 33 + 33) % 33
-        return (cycle == 1 || cycle == 5 || cycle == 9 || cycle == 13 ||
-                cycle == 17 || cycle == 22 || cycle == 26 || cycle == 30)
+        val cycle = ((jy + 12) % 33 + 33) % 33
+        return cycle in setOf(1, 5, 9, 13, 17, 22, 26, 30)
     }
 
     fun daysInJalaliMonth(jy: Int, jm: Int): Int = when (jm) {
