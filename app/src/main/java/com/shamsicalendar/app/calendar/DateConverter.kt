@@ -1,7 +1,8 @@
 package com.shamsicalendar.app.calendar
 
-import java.util.Calendar
-import java.util.GregorianCalendar
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 /**
  * مبدل تاریخ بین سه تقویم شمسی، میلادی و قمری
@@ -48,11 +49,7 @@ object DateConverter {
     }
 
     fun today(): TriCalendar {
-        val cal = GregorianCalendar()
-        return fromGregorian(
-            cal.get(Calendar.YEAR),
-            cal.get(Calendar.MONTH) + 1,
-            cal.get(Calendar.DAY_OF_MONTH)
-        )
+        val today = LocalDate.now()
+        return fromGregorian(today.year, today.monthValue, today.dayOfMonth)
     }
 }

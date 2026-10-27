@@ -1,13 +1,17 @@
 package com.shamsicalendar.app.calendar
 
-import java.util.Calendar
-import java.util.GregorianCalendar
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.chrono.HijrahDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoField
+import java.util.Locale
 
 /**
- * تقویم Jalali (شمسی) - مبتنی بر الگوریتم div/mod معتبر jdf
- * (نسخه استاندارد استفاده‌شده در اپ‌های ایرانی)
+ * تقویم Jalali (شمسی) - مبتنی بر الگوریتم jdf که در اپ‌های ایرانی استفاده می‌شود
+ * و برای تاریخ‌های مدرن کاملاً دقیق است.
  *
- * ماه‌ها: ۶ ماه اول ۳۱ روزه، ۵ ماه بعدی ۳۰ روزه، ماه آخر ۲۹ یا ۳۰ روزه (کبیسه)
+ * این پیاده‌سازی از java.time (API 26+) استفاده می‌کند.
  */
 object JalaliCalendar {
 
@@ -20,90 +24,104 @@ object JalaliCalendar {
             "${toPersianDigits(year.toString())}/${toPersianDigits(month.toString().padStart(2, '0'))}/${toPersianDigits(day.toString().padStart(2, '0'))}"
     }
 
-    /** تبدیل میلادی به شمسی - الگوریتم استاندارد jdf */
+    /** تبدیل میلادی به شمسی - الگوریتم jdf */
     fun gregorianToJalali(gy: Int, gm: Int, gd: Int): JDate {
-        var g_d_m = intArrayOf(0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334)
+        val jArr = longArrayOf(0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334)
 
-        var gy2 = if (gm > 2) gy + 1 else gy
-        var days = 355666 + 365 * gy + (gy2 + 3) / 4 - (gy2 + 99) / 100 + (gy2 + 399) / 400 + gd + g_d_m[gm - 1]
+        val j2 = if (gm > 2) gy + 1L else gy.toLong()
 
-        var jy = -1595 + 33 * (days / 12053)
-        days %= 12053
+        val j5 = ((j2 + 399) / 400) +
+            ((((3 + j2) / 4) + (gy * 365L + 355666)) - ((99 + j2) / 100)) +
+            gd + jArr[gm - 1]
 
-        jy += 4 * (days / 1461)
-        days %= 1461
+        var j6 = (j5 / 12053) * 33 - 1595
+        var j7 = j5 % 12053
+        var j8 = (j7 / 1461) * 4 + j6
+        var j9 = j7 % 1461
 
-        if (days > 365) {
-            jy += (days - 1) / 365
-            days = (days - 1) % 365
+        if (j9 > 365) {
+            val j10 = j9 - 1
+            j8 += j10 / 365
+            j9 = j10 % 365
         }
 
-        var jm: Int
-        var jd: Int
-        if (days < 186) {
-            jm = 1 + days / 31
-            jd = 1 + (days % 31)
+        val jm: Int
+        val jd: Long
+        if (j9 < 186) {
+            jm = (j9 / 31 + 1).toInt()
+            jd = j9 % 31 + 1
         } else {
-            jm = 7 + (days - 186) / 30
-            jd = 1 + (days - 186) % 30
+            jm = ((j9 - 186) / 30 + 7).toInt()
+            jd = (j9 - 186) % 30 + 1
         }
 
-        return JDate(jy, jm, jd)
+        return JDate(j8.toInt(), jm, jd.toInt())
     }
 
-    /** تبدیل شمسی به میلادی - الگوریتم استاندارد jdf */
+    /** تبدیل شمسی به میلادی - الگوریتم jdf معکوس */
     fun jalaliToGregorian(jy: Int, jm: Int, jd: Int): Triple<Int, Int, Int> {
-        var jy2 = jy - 979
-        var days = 365 * jy2 + (jy2 / 33) * 8 + (jy2 % 33 + 3) / 4 + jd
-        if (jm < 7) {
-            days += (jm - 1) * 31
-        } else {
-            days += (jm - 7) * 30 + 186
-        }
+        val j2 = jy + 1595L
+        var j3 = (((j2 % 33 + 3) / 4) + (j2 / 33) * 8 + (j2 * 365 - 355668) + jd)
 
-        var gy = 400 * (days / 146097)
-        days %= 146097
+        val i2 = if (jm < 7) (jm - 1) * 31 else (jm - 7) * 30 + 186
+        val j4 = j3 + i2
 
-        var leap = true
-        if (days >= 36525) {
-            days--
-            gy += 100 * (days / 36524)
-            days %= 36524
-            if (days >= 365) {
-                days++
-            } else {
-                leap = false
+        var j5 = (j4 / 146097) * 400
+        var j6 = j4 % 146097
+
+        if (j6 > 36524) {
+            val j7 = j6 - 1
+            j5 = (j7 / 36524) * 100 + j5
+            j6 = j7 % 36524
+            if (j6 >= 365) {
+                j6++
             }
         }
 
-        gy += 4 * (days / 1461)
-        days %= 1461
+        var j8 = (j6 / 1461) * 4 + j5
+        var j9 = j6 % 1461
 
-        if (days > 365) {
-            gy += (days - 1) / 365
-            days = (days - 1) % 365
-            leap = false
+        if (j9 > 365) {
+            val j10 = j9 - 1
+            j8 = j10 / 365 + j8
+            j9 = j10 % 365
         }
 
-        var sal_a = if (leap) intArrayOf(0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335)
-        else intArrayOf(0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334)
+        val j11 = j8
+        var i7 = j9.toInt() + 1
 
-        var gm = 0
-        while (gm < 11 && days >= sal_a[gm + 1]) {
-            gm++
+        // کبیسه میلادی
+        val isLeap = (j11 % 4 == 0L && j11 % 100 != 0L) || j11 % 400 == 0L
+        val feb = if (isLeap) 29 else 28
+        val iArr = intArrayOf(0, 31, feb, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+
+        var i5 = 1
+        while (i5 <= 12 && i7 > iArr[i5]) {
+            i7 -= iArr[i5]
+            i5++
         }
-        var gd = days - sal_a[gm] + 1
 
-        return Triple(gy + 1600, gm + 1, gd)
+        return Triple(j11.toInt(), i5, i7)
     }
 
     fun isGregorianLeap(year: Int): Boolean =
         (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)
 
-    /** آیا سال شمسی کبیسه است؟ - بر اساس محاسبه دقیق */
+    /**
+     * آیا سال شمسی کبیسه است؟
+     * روش دقیق: اسفند سال j سال کبیسه است اگر 1 فروردین سال j+1 یک روز زودتر (در روز 365) شروع شود
+     * پیاده‌سازی ساده: تبدیل به میلادی و بررسی فاصله
+     */
     fun isJalaliLeap(jy: Int): Boolean {
-        val cycle = ((jy + 12) % 33 + 33) % 33
-        return cycle in setOf(1, 5, 9, 13, 17, 22, 26, 30)
+        // اسفند دار 30 روز است اگر کبیسه باشد
+        // 29 اسفند j را به میلادی تبدیل می‌کنیم، اگر 30 اسفند هم در همان سال شمسی باشد یعنی کبیسه است
+        val (gy1, gm1, gd1) = jalaliToGregorian(jy, 12, 29)
+        val (gy2, gm2, gd2) = jalaliToGregorian(jy, 12, 30)
+        // اگر 30 اسفند به سال بعد برود یعنی کبیسه نیست
+        // در غیر این صورت (همان روز بعد در همان سال) کبیسه است
+        val d1 = LocalDate.of(gy1, gm1, gd1)
+        val d2 = LocalDate.of(gy2, gm2, gd2)
+        return d2.dayOfYear == d1.dayOfYear + 1
     }
 
     fun daysInJalaliMonth(jy: Int, jm: Int): Int = when (jm) {
@@ -116,20 +134,18 @@ object JalaliCalendar {
     /** روز هفته: 0=شنبه، 1=یکشنبه، ... 6=جمعه */
     fun dayOfWeek(jy: Int, jm: Int, jd: Int): Int {
         val (gy, gm, gd) = jalaliToGregorian(jy, jm, jd)
-        val cal = GregorianCalendar(gy, gm - 1, gd)
-        // Java: 1=Sunday ... 7=Saturday
-        val dow = cal.get(Calendar.DAY_OF_WEEK)
+        val date = LocalDate.of(gy, gm, gd)
+        // Java: MONDAY=1 ... SUNDAY=7
+        val dow = date.dayOfWeek.value
         // Convert to: 0=Saturday ... 6=Friday
-        return (dow + 1) % 7
+        // SAT=6 in Java, so (6+1)%7=0 → SAT=0
+        return dow % 7
     }
 
     fun today(): JDate {
-        val cal = GregorianCalendar()
-        return gregorianToJalali(
-            cal.get(Calendar.YEAR),
-            cal.get(Calendar.MONTH) + 1,
-            cal.get(Calendar.DAY_OF_MONTH)
-        )
+        val zone = ZoneId.of("Asia/Tehran")
+        val today = LocalDate.now(zone)
+        return gregorianToJalali(today.year, today.monthValue, today.dayOfMonth)
     }
 
     /** تولید تمام روزهای یک ماه شمسی به همراه اطلاعات روز هفته و فاصله از ابتدای شبکه */
@@ -137,12 +153,10 @@ object JalaliCalendar {
         val days = daysInJalaliMonth(jy, jm)
         val firstDow = dayOfWeek(jy, jm, 1) // 0=Sat
         val cells = mutableListOf<GridCell>()
-        // سلول‌های خالی ابتدای ماه
         repeat(firstDow) { cells.add(GridCell.Empty) }
         for (d in 1..days) {
             cells.add(GridCell.Day(d, dayOfWeek(jy, jm, d)))
         }
-        // تکمیل تا 42 سلول برای 6 ردیف
         while (cells.size % 7 != 0) cells.add(GridCell.Empty)
         return cells
     }
@@ -188,9 +202,8 @@ object JalaliCalendar {
     fun daysBetween(start: JDate, end: JDate): Int {
         val (sgy, sgm, sgd) = jalaliToGregorian(start.year, start.month, start.day)
         val (egy, egm, egd) = jalaliToGregorian(end.year, end.month, end.day)
-        val s = GregorianCalendar(sgy, sgm - 1, sgd)
-        val e = GregorianCalendar(egy, egm - 1, egd)
-        val diff = (e.timeInMillis - s.timeInMillis) / (1000L * 60 * 60 * 24)
-        return diff.toInt()
+        val s = LocalDate.of(sgy, sgm, sgd)
+        val e = LocalDate.of(egy, egm, egd)
+        return (e.toEpochDay() - s.toEpochDay()).toInt()
     }
 }
