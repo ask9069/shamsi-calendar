@@ -38,7 +38,7 @@ class MiniWidgetProvider : AppWidgetProvider() {
         val today = JalaliCalendar.today()
         val dow = JalaliCalendar.dayOfWeek(today.year, today.month, today.day)
         val occasions = Holidays.getForDay(today.month, today.day)
-        val isHoliday = today.dayOfWeek == 6 || occasions.any { it.isHoliday }
+        val isHoliday = dow == 6 || occasions.any { it.isHoliday }
 
         val views = RemoteViews(context.packageName, R.layout.widget_mini)
 
