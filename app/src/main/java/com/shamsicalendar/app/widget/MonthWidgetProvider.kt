@@ -34,6 +34,13 @@ class MonthWidgetProvider : AppWidgetProvider() {
         appWidgetIds.forEach { id ->
             updateWidget(context, appWidgetManager, id)
         }
+        // تنظیم refresh خودکار نیمه‌شب
+        WidgetUpdateReceiver.scheduleNextRefresh(context)
+    }
+
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        WidgetUpdateReceiver.scheduleNextRefresh(context)
     }
 
     override fun onReceive(context: Context, intent: Intent) {

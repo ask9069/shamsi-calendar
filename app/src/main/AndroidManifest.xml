@@ -56,7 +56,7 @@
                 android:resource="@xml/widget_mini_info" />
         </receiver>
 
-        <!-- گیرنده به‌روزرسانی تاریخ و بوت -->
+        <!-- گیرنده به‌روزرسانی تاریخ و بوت و نیمه‌شب روزانه -->
         <receiver
             android:name=".widget.WidgetUpdateReceiver"
             android:exported="true">
@@ -65,6 +65,7 @@
                 <action android:name="android.intent.action.TIME_SET" />
                 <action android:name="android.intent.action.DATE_CHANGED" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="com.shamsicalendar.app.REFRESH_WIDGET" />
             </intent-filter>
         </receiver>
 

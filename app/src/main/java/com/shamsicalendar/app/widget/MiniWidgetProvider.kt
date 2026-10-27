@@ -28,6 +28,13 @@ class MiniWidgetProvider : AppWidgetProvider() {
         appWidgetIds.forEach { id ->
             updateWidget(context, appWidgetManager, id)
         }
+        // تنظیم refresh خودکار نیمه‌شب
+        WidgetUpdateReceiver.scheduleNextRefresh(context)
+    }
+
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        WidgetUpdateReceiver.scheduleNextRefresh(context)
     }
 
     private fun updateWidget(
@@ -42,10 +49,14 @@ class MiniWidgetProvider : AppWidgetProvider() {
 
         val views = RemoteViews(context.packageName, R.layout.widget_mini)
 
-        // روز ماه
+        // روز ماه - قرمز برای تعطیل
         views.setTextViewText(R.id.mini_day, JalaliCalendar.toPersianDigits(today.day))
-        // روز هفته
+        views.setTextColor(R.id.mini_day, if (isHoliday) 0xFFEF4444.toInt() else 0xFFD4AF37.toInt())
+
+        // روز هفته - قرمز برای تعطیل
         views.setTextViewText(R.id.mini_weekday, JalaliCalendar.weekDayNames[dow])
+        views.setTextColor(R.id.mini_weekday, if (isHoliday) 0xFFFF6B6B.toInt() else 0xFFF5E6A8.toInt())
+
         // نام ماه
         views.setTextViewText(R.id.mini_month, JalaliCalendar.monthNames[today.month - 1])
 
