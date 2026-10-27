@@ -15,11 +15,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material.icons.filled.Today
+import androidx.compose.ui.res.painterResource
+import com.shamsicalendar.app.R
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -116,10 +113,10 @@ fun CalendarScreen(
                         currentMonth = today.month
                         selectedDay = today.day
                     }) {
-                        Icon(Icons.Default.Today, contentDescription = "امروز", tint = GoldPrimary)
+                        Icon(painterResource(R.drawable.ic_today), contentDescription = "امروز", tint = GoldPrimary)
                     }
                     IconButton(onClick = onNavigateToConverter) {
-                        Icon(Icons.Default.SwapHoriz, contentDescription = "مبدل", tint = GoldPrimary)
+                        Icon(painterResource(R.drawable.ic_swap_horiz), contentDescription = "مبدل", tint = GoldPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -159,7 +156,7 @@ fun CalendarScreen(
                     } else currentMonth++
                     selectedDay = 1
                 }) {
-                    Icon(Icons.Default.ChevronRight, contentDescription = "ماه بعد", tint = GoldPrimary)
+                    Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = "ماه بعد", tint = GoldPrimary)
                 }
                 Card(
                     modifier = Modifier
@@ -189,7 +186,7 @@ fun CalendarScreen(
                     } else currentMonth--
                     selectedDay = 1
                 }) {
-                    Icon(Icons.Default.ChevronLeft, contentDescription = "ماه قبل", tint = GoldPrimary)
+                    Icon(painterResource(R.drawable.ic_chevron_left), contentDescription = "ماه قبل", tint = GoldPrimary)
                 }
             }
 
