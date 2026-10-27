@@ -36,7 +36,20 @@
 # Optimization passes
 -optimizationpasses 5
 -allowaccessmodification
--mergeinterfacesaggressively
 
-# Resource shrinking
--shrinkresources true
+# kotlinx.coroutines
+-dontwarn kotlinx.coroutines.**
+-keep class kotlinx.coroutines.** { *; }
+
+# Room
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class *
+-dontwarn androidx.room.paging.**
+
+# Compose runtime
+-keep class androidx.compose.runtime.** { *; }
+-keep class androidx.compose.ui.** { *; }
+-keep class androidx.compose.material3.** { *; }
+
+# Disable some warnings
+-dontwarn java.lang.invoke.StringConcatFactory
