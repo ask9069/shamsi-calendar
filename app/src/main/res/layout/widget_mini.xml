@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mini_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_bg"
+    android:gravity="center"
+    android:padding="10dp">
+
+    <!-- روز هفته -->
+    <TextView
+        android:id="@+id/mini_weekday"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/gold_light"
+        android:textSize="12sp"
+        android:fontFamily="@font/vazirmatn_medium"
+        android:layout_marginBottom="2dp" />
+
+    <!-- عدد روز بزرگ -->
+    <TextView
+        android:id="@+id/mini_day"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/gold_primary"
+        android:textSize="44sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/vazirmatn_bold" />
+
+    <!-- نام ماه -->
+    <TextView
+        android:id="@+id/mini_month"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_primary"
+        android:textSize="14sp"
+        android:fontFamily="@font/vazirmatn_medium"
+        android:layout_marginTop="2dp" />
+
+    <!-- تاریخ میلادی -->
+    <TextView
+        android:id="@+id/mini_gregorian"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_secondary"
+        android:textSize="10sp"
+        android:fontFamily="@font/vazirmatn_regular"
+        android:layout_marginTop="4dp" />
+
+    <!-- تاریخ قمری -->
+    <TextView
+        android:id="@+id/mini_islamic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/gold_light"
+        android:textSize="10sp"
+        android:fontFamily="@font/vazirmatn_regular" />
+
+    <!-- مناسبت روز -->
+    <TextView
+        android:id="@+id/mini_occasion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/holiday_red"
+        android:textSize="9sp"
+        android:fontFamily="@font/vazirmatn_regular"
+        android:layout_marginTop="4dp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:visibility="gone" />
+
+</LinearLayout>

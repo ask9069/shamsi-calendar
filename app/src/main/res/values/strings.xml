@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">تقویم شمسی</string>
+    <string name="widget_month_desc">نمایش ماه کامل تقویم شمسی با هایلایت امروز</string>
+    <string name="widget_mini_desc">نمایش سریع تاریخ امروز شمسی، میلادی و قمری</string>
+    <string name="today">امروز</string>
+    <string name="events">رویدادها</string>
+    <string name="converter">مبدل تاریخ</string>
+    <string name="add_event">افزودن رویداد</string>
+    <string name="title">عنوان</string>
+    <string name="description">توضیحات</string>
+    <string name="year">سال</string>
+    <string name="month">ماه</string>
+    <string name="day">روز</string>
+    <string name="hour">ساعت</string>
+    <string name="minute">دقیقه</string>
+    <string name="reminder">یادآور</string>
+    <string name="save">ذخیره</string>
+    <string name="cancel">انصراف</string>
+    <string name="delete">حذف</string>
+    <string name="back">بازگشت</string>
+    <string name="no_events">هنوز رویدادی ثبت نشده است</string>
+</resources>
